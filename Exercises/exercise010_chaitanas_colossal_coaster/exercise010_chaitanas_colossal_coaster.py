@@ -73,7 +73,7 @@ def add_me_with_my_friends(queue: list, index: int, person_name: str) -> list:
             raise TypeError("Persons in queues must be strings.")
     if not isinstance(index, int):
         raise TypeError("Index must be an integer.")
-    if index not in range(len(queue)):
+    if index not in range(len(queue)+1):
         raise ValueError("Invalid index.")
     if not isinstance(person_name, str):
         raise TypeError("Person name must be a string.")
