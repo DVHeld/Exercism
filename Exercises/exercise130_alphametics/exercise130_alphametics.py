@@ -1,7 +1,5 @@
 """Alphametics exercise"""
 
-"""Alphametics exercise"""
-
 from string import ascii_uppercase
 
 def _split(puzzle: str, /) -> tuple:
