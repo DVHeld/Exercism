@@ -4,7 +4,7 @@
 
 import unittest
 
-from alphametics import (
+from exercise130_alphametics import (
     solve,
 )
 
