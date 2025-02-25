@@ -30,7 +30,7 @@ def solve(puzzle: str, /) -> dict:
 
     addends, result = _split(puzzle)
     solution = defaultdict(int)
-    max_len = max(max(len(addends)), len(solution))
+    max_len = max(max(len(addend) for addend in addends), len(solution))
     remainders = [0] * max_len
     letters = set(''.join(result).join(addends))
     letter_digits = {letter:list(range(10)) for letter in letters}
@@ -46,7 +46,9 @@ def solve(puzzle: str, /) -> dict:
 ######################### TESTING AREA #########################
 
 # mypuzzle = "SEND + MORE == MONEY"
-# myaddends = ["SEND", "MORE"]
+# myaddends = ["SEND", "MORE", "ANDREWAA"]
 # myresult = "MONEY"
+# my_max_len = max(max(len(myaddend) for myaddend in myaddends), len(myresult))
+# print(my_max_len)
 # myletters = set(''.join(myresult).join(myaddends))
 # print({letter:list(range(10)) for letter in set("QWERTY")})
