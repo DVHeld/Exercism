@@ -1,6 +1,7 @@
 """Alphametics exercise"""
 
 from string import ascii_uppercase
+from collections import defaultdict
 
 def _split(puzzle: str, /) -> tuple:
     addends, result = puzzle.replace(" ", "").split("==")
@@ -26,13 +27,26 @@ def solve(puzzle: str, /) -> dict:
     """
 
     _validate(puzzle)
-    addends, result = _split(puzzle)
-    solution = {}
 
+    addends, result = _split(puzzle)
+    solution = defaultdict(int)
+    max_len = max(max(len(addends)), len(solution))
+    remainders = [0] * max_len
+    letters = set(''.join(result).join(addends))
+    letter_digits = {letter:list(range(10)) for letter in letters}
+
+    column = max_len
+    while column > 0:
+        row = 0
+        while row > len(addends):
+            row += 1
+        column -= 1
     return solution
 
 ######################### TESTING AREA #########################
 
-mypuzzle = "SEND + MORE == MONEY"
-
-# print(_validate(mypuzzle))
+# mypuzzle = "SEND + MORE == MONEY"
+# myaddends = ["SEND", "MORE"]
+# myresult = "MONEY"
+# myletters = set(''.join(myresult).join(myaddends))
+# print({letter:list(range(10)) for letter in set("QWERTY")})
