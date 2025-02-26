@@ -20,10 +20,10 @@ def _split(puzzle: str, /) -> tuple:
     return (addends, result)
 
 def _extract_operations(addends: list, result: str, /) -> list:
-    operations = [([], letter) for letter in reversed(result)]
+    operations = [["", letter] for letter in reversed(result)]
     for addend in addends:
         for index, letter in enumerate(reversed(addend)):
-            operations[index][0].append(letter)
+            operations[index][0] += letter
     return operations
 
 def solve(puzzle: str, /) -> dict:
@@ -36,20 +36,23 @@ def solve(puzzle: str, /) -> dict:
     _validate(puzzle)
 
     addends, result = _split(puzzle)
+
+    if max(len(addend) for addend in addends) > len(result):
+        raise ValueError("The length of the result must be greater or equal to the length of the"+\
+                         " addends.")
+
     operations = _extract_operations(addends, result)
+    max_len = len(operations)
     max_len = max(max(len(addend) for addend in addends), len(result))
     letters = set(''.join(result).join(addends))
     remainders = [0] * max_len
     letter_digits = {letter:list(range(10)) for letter in letters}
     solution = defaultdict(int)
 
+    operation_index = 0
+    while operation_index > max_len:
+        pass
 
-    column = max_len
-    while column > 0:
-        row = 0
-        while row > len(addends):
-            row += 1
-        column -= 1
     return solution
 
 ######################### TESTING AREA #########################
@@ -61,3 +64,4 @@ def solve(puzzle: str, /) -> dict:
 # print(my_max_len)
 # myletters = set(''.join(myresult).join(myaddends))
 # print({letter:list(range(10)) for letter in set("QWERTY")})
+# print(_extract_operations(["SEND", "MORE"], "MONEY"))
