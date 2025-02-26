@@ -44,11 +44,12 @@ def solve(puzzle: str, /) -> dict:
     operations = _extract_operations(addends, result)
     max_len = len(operations)
     max_len = max(max(len(addend) for addend in addends), len(result))
-    letters = set(''.join(result).join(addends))
-    remainders = [0] * max_len
-    letter_digits = {letter:reversed(list(range(10))) for letter in letters}
-    digits = reversed(list(range(10)))
-    solution = defaultdict(int)
+    # letters = set(''.join(result).join(addends))
+    # solution = defaultdict(int)
+    solution = {letter: None for letter in set(''.join(result).join(addends))}
+    carry = [0] * max_len
+    # letter_digits = {letter:list(reversed(list(range(10)))) for letter in letters}
+    digits = list(reversed(list(range(10))))
 
     operation_index = 0
     while operation_index < max_len:
@@ -59,28 +60,32 @@ def solve(puzzle: str, /) -> dict:
             if solution[letter] is None:
                 solution[letter] = digits.pop()
                 operation_sum += solution[letter]
+            letter_index += 1
 
-        # TODO: Calculate remainder
+        carry[operation_index+1] = operation_sum % 10
+        operation_result = operation_sum // 10
 
         if solution[operations[operation_index][1]] is None:
-            if operation_sum in digits:
-                solution[operations[operation_index][1]] = operation_sum
+            if operation_result in digits:
+                solution[operations[operation_index][1]] = operation_result
             else:
                 # TODO: Backtrack
-        elif solution[operations[operation_index][1]] != operation_sum:
+                pass
+        elif solution[operations[operation_index][1]] != operation_result:
             # TODO: Backtrack
-                
-            letter_index += 1
+            pass
         operation_index += 1
     return dict(solution)
 
 ######################### TESTING AREA #########################
 
 # mypuzzle = "SEND + MORE == MONEY"
-# myaddends = ["SEND", "MORE", "ANDREWAA"]
+# myaddends = ["SEND", "MORE"]
 # myresult = "MONEY"
 # my_max_len = max(max(len(myaddend) for myaddend in myaddends), len(myresult))
 # print(my_max_len)
 # myletters = set(''.join(myresult).join(myaddends))
 # print({letter:list(range(10)) for letter in set("QWERTY")})
 # print(_extract_operations(["SEND", "MORE"], "MONEY"))
+# print(reversed(list(range(10))))
+# print({letter: None for letter in set(''.join(myresult).join(myaddends))})
