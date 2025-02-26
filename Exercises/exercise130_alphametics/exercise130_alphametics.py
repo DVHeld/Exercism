@@ -46,14 +46,33 @@ def solve(puzzle: str, /) -> dict:
     max_len = max(max(len(addend) for addend in addends), len(result))
     letters = set(''.join(result).join(addends))
     remainders = [0] * max_len
-    letter_digits = {letter:list(range(10)) for letter in letters}
+    letter_digits = {letter:reversed(list(range(10))) for letter in letters}
+    digits = reversed(list(range(10)))
     solution = defaultdict(int)
 
     operation_index = 0
-    while operation_index > max_len:
-        pass
+    while operation_index < max_len:
+        letter_index = 0
+        operation_sum = 0
+        while letter_index < len(operations[operation_index]):
+            letter = operations[operation_index][0][letter_index]
+            if solution[letter] is None:
+                solution[letter] = digits.pop()
+                operation_sum += solution[letter]
 
-    return solution
+        # TODO: Calculate remainder
+
+        if solution[operations[operation_index][1]] is None:
+            if operation_sum in digits:
+                solution[operations[operation_index][1]] = operation_sum
+            else:
+                # TODO: Backtrack
+        elif solution[operations[operation_index][1]] != operation_sum:
+            # TODO: Backtrack
+                
+            letter_index += 1
+        operation_index += 1
+    return dict(solution)
 
 ######################### TESTING AREA #########################
 
