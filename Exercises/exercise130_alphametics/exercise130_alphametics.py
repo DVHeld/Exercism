@@ -1,7 +1,6 @@
 """Alphametics exercise"""
 
 from string import ascii_uppercase
-from collections import defaultdict
 
 def _validate(puzzle: any, /) -> None:
     if not puzzle:
@@ -20,10 +19,10 @@ def _split(puzzle: str, /) -> tuple:
     return (addends, result)
 
 def _extract_operations(addends: list, result: str, /) -> list:
-    operations = [["", letter] for letter in reversed(result)]
+    operations = [{"operation": "", "letter": letter} for letter in reversed(result)]
     for addend in addends:
         for index, letter in enumerate(reversed(addend)):
-            operations[index][0] += letter
+            operations[index]["operation"] += letter
     return operations
 
 def solve(puzzle: str, /) -> dict:
@@ -34,7 +33,6 @@ def solve(puzzle: str, /) -> dict:
     """
 
     _validate(puzzle)
-
     addends, result = _split(puzzle)
 
     if max(len(addend) for addend in addends) > len(result):
@@ -42,39 +40,54 @@ def solve(puzzle: str, /) -> dict:
                          " addends.")
 
     operations = _extract_operations(addends, result)
-    max_len = len(operations)
-    max_len = max(max(len(addend) for addend in addends), len(result))
-    # letters = set(''.join(result).join(addends))
-    # solution = defaultdict(int)
+    max_len = len(result)
+    letters = set(''.join(result).join(addends))
     solution = {letter: None for letter in set(''.join(result).join(addends))}
-    carry = [0] * max_len
-    # letter_digits = {letter:list(reversed(list(range(10)))) for letter in letters}
     digits = list(reversed(list(range(10))))
+    letter_digits = {letter: {"available": digits, "used": None, "backtrack": False}
+                     for letter in letters}
+    carry = [0] * max_len
 
     operation_index = 0
     while operation_index < max_len:
-        letter_index = 0
         operation_sum = 0
+        letter_index = 0
         while letter_index < len(operations[operation_index]):
-            letter = operations[operation_index][0][letter_index]
-            if solution[letter] is None:
-                solution[letter] = digits.pop()
-                operation_sum += solution[letter]
+            letter = operations[operation_index]["operation"][letter_index]
+            if solution[letter] is None: # Assign next digit
+                if len(letter_digits[letter]["available digits"]): # Add next digit to solution
+                    digit = letter_digits[letter]["available digits"].pop()
+                    letter_digits[letter]["used digits"].append(digit)
+                    for l in letters:
+                        letter_digits[l]["available digits"].append(solution[letter]).sort()
+                        letter_digits[l]["available digits"].remove(digit)
+                    solution[letter] = digit
+                    operation_sum += solution[letter]
+                else: # Backtrack
+                    letter_digits[letter]["available digits"] = letter_digits[letter]["used digits"]
+                    letter_digits[letter]["available digits"].append(solution[letter]).sort()
+                    letter_digits[letter]["used digits"] = []
+                    solution[letter] = None
+                    letter_index -= 2 # TODO: What if letter index < 0? Backtrack to previous operation
             letter_index += 1
 
         carry[operation_index+1] = operation_sum % 10
         operation_result = operation_sum // 10
 
-        if solution[operations[operation_index][1]] is None:
-            if operation_result in digits:
-                solution[operations[operation_index][1]] = operation_result
-            else:
-                # TODO: Backtrack
-                pass
-        elif solution[operations[operation_index][1]] != operation_result:
-            # TODO: Backtrack
+        if solution[operations[operation_index]["letter"]] is None:
+            if operation_result not in solution.values(): # Add operation result to solution
+                letter_digits[letter]["available digits"].pop(operation_result)
+                letter_digits[letter]["used digits"].append(operation_result)
+                for l in letters:
+                    letter_digits[l]["available"].remove(operation_result)
+                solution[operations[operation_index]["letter"]] = operation_result
+                operation_index += 1
+            else: # TODO: Backtrack letter
+                letter_index -= 1
+        elif solution[operations[operation_index]["letter"]] != operation_result: # TODO: Backtrack operation?
             pass
-        operation_index += 1
+        else:
+            operation_index += 1
     return dict(solution)
 
 ######################### TESTING AREA #########################
