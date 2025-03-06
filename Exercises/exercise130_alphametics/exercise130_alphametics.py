@@ -43,7 +43,7 @@ def solve(puzzle: str, /) -> dict:
     max_len = len(result)
     addend_amount = len(addends)
     letters = set(''.join(result).join(addends))
-    solution = dict(sorted({letter: None for letter in set(''.join(result).join(addends))}.items()))
+    solution = dict(sorted({letter: None for letter in set(''.join(result).join(addends))}.items())) # TODO: remove sorting
     digits = list(reversed(list(range(10))))
     letter_digits = {letter: {"available digits": digits[:], "used digits": [], "backtrack": False}
                      for letter in letters}
