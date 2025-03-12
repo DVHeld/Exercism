@@ -38,6 +38,7 @@ def solve(puzzle: str, /) -> dict:
         else:
             letter = letter_input
         nonlocal letter_digits, letter_index, letters, solution, backtracked
+        # print(f"up | {letter_index, solution, letter, letter_digits[letter]["backtrack"]} | btM: {letter_digits["M"]["backtrack"]}")
         if letter_digits[letter]["backtrack"] == 1:
             for l in letters:
                 if l != letter and solution[letter] not in letter_digits[l]["used digits"]:
@@ -48,9 +49,11 @@ def solve(puzzle: str, /) -> dict:
             letter_index -= 1
         else:
             letter_index -= 2
-        letter_digits[letter_input]["backtrack"] -= 1
         if pl:
             letter_digits[pl]["backtrack"] -= 1
+            # print(f"pl: {pl} | btM: {letter_digits["M"]["backtrack"]}")
+        letter_digits[letter_input]["backtrack"] -= 1
+        # print(f" | btM: {letter_digits["M"]["backtrack"]}")
         backtracked = True
 
     _validate(puzzle)
@@ -71,21 +74,25 @@ def solve(puzzle: str, /) -> dict:
     carry = [0] * max_len
     backtracked = False
 
+    ################ TEST VARIABLES #################
     testing_counter = 0 # TODO: delete
-    testing_counter_limit = 70 # TODO: delete
+    testing_counter_limit = 6800 # TODO: delete
+    ################ TEST VARIABLES #################
 
     operation_index = 0
     letter_index = 0
     while operation_index < max_len:
-        # print("letter_index:", letter_index)
+        # print("letter_index:", letter_index, "| btM: ", {letter_digits["M"]["backtrack"]})
         if not backtracked:
             letter_index = 0
         backtracked = False
+        # print(f"op_index: {operation_index} | op: {operations[operation_index]} | letter_index: {letter_index} | btM: {letter_digits["M"]["backtrack"]}")
         while letter_index < len(operations[operation_index]["operation"]):
-            print(operation_index, list(operations[operation_index]["operation"]), letter_index)
+            # print(operation_index, list(operations[operation_index]["operation"]), letter_index,  "| btM: ", {letter_digits["M"]["backtrack"]})
             letter = operations[operation_index]["operation"][letter_index]
-            print(f"{testing_counter:0{len(str(testing_counter_limit))}} || letter_index: {letter_index:01} | letter bt: {letter} {letter_digits[letter]["backtrack"]} | {solution} | {operations[operation_index]["operation"]} = {operations[operation_index]["result"]} | {letter_digits["M"]["available digits"]} {letter_digits["M"]["used digits"]}")
+            print(f"{testing_counter:0{len(str(testing_counter_limit))}} || letter_index: {letter_index:01} | letter bt: {letter} {letter_digits[letter]["backtrack"]} | {solution} | {operations[operation_index]["operation"]} = {operations[operation_index]["result"]} | {carry} | btM: {letter_digits["M"]["backtrack"]}")
             if solution[letter] is None: # Assign next digit
+                # print("ADDD")
                 if len(letter_digits[letter]["available digits"]): # Add next digit to solution
                     digit = letter_digits[letter]["available digits"].pop()
                     letter_digits[letter]["used digits"].append(digit)
@@ -98,13 +105,20 @@ def solve(puzzle: str, /) -> dict:
                                 letter_digits[l]["available digits"].remove(digit)
                     solution[letter] = digit
                 else: # Backtrack
+                    # print("BT")
                     letter_digits[letter]["available digits"] = letter_digits[letter]["used digits"]
                     letter_digits[letter]["used digits"] = []
                     letter_digits[letter]["available digits"].sort()
                     letter_digits[letter]["available digits"].reverse()
                     letter_index -= 1
-                    # print(operations[operation_index]["operation"][letter_index], letter_digits[operations[operation_index]["operation"][letter_index]]["backtrack"])
-                    _update_letters(letter, operations[operation_index]["operation"][letter_index])
+                    # print(operations[operation_index]["operation"][letter_index], letter_index, letter, letter_digits[operations[operation_index]["operation"][letter_index]]["backtrack"])
+                    # print(f"letter1: {letter}")
+                    if letter_index >= 0:
+                        _update_letters(letter, operations[operation_index]["operation"][letter_index])
+                    else:
+                        _update_letters(letter)
+                        
+                    # print(f"letter2: {letter}")
                     # pl = operations[operation_index]["operation"][letter_index]
                     # for l in letters:
                     #     if l != pl:
@@ -115,29 +129,32 @@ def solve(puzzle: str, /) -> dict:
                     # letter_digits[letter]["backtrack"] -= 1
                     # letter_index -= 1
                     # backtracked = True
+            # print(f"plusbt1: {letter} {letter_digits[letter]["backtrack"]} | btM: {letter_digits["M"]["backtrack"]}")
             letter_digits[letter]["backtrack"] += 1
-            # print(f"plusbt: {letter} {letter_digits[letter]["backtrack"]}")
+            # print(f"plusbt2: {letter} {letter_digits[letter]["backtrack"]} | btM: {letter_digits["M"]["backtrack"]}")
             letter_index += 1
-            print(f"# letter_index: {letter_index}")
-            if letter_index < 0: # Backtrack to previous operation
+            # print(f"# letter_index: {letter_index} | btM: {letter_digits["M"]["backtrack"]}")
+            if letter_index < 0: # Backtrack operation
                 letter_index = addend_amount
                 operation_index -= 1
                 _update_letters(operations[operation_index]["operation"][letter_index-1])
-            # print(f"$ operation_index: {operation_index}")
-
+            # print(f"$ operation_index: {operation_index} | btM: {letter_digits["M"]["backtrack"]}")
+        print(operation_index)
         operation_sum = carry[operation_index]
         for l in operations[operation_index]["operation"]:
-            # print(f"{solution}, sol: {solution[l]}, opsum: {operation_sum}, l: {l}, opindex: {operation_index}, op: {operations[operation_index]["operation"]}")
+            print(carry, operations[operation_index]["operation"], operation_sum, l, solution[l])
             operation_sum += solution[l]
+            # print(f"{solution}, sol: {solution[l]}, opsum: {operation_sum}, l: {l}, opindex: {operation_index}, op: {operations[operation_index]["operation"]} | btM: {letter_digits["M"]["backtrack"]}")
         if operation_index < len(operations)-1:
             carry[operation_index+1] = operation_sum // 10
         operation_result = operation_sum % 10
 
-        print(f"{testing_counter:0{len(str(testing_counter_limit))}} |  letter_index: {letter_index:01} | letter bt: {letter} {letter_digits[letter]["backtrack"]} | {solution} | {operations[operation_index]["operation"]} = {operations[operation_index]["result"]} | {letter_digits["M"]["available digits"]} {letter_digits["M"]["used digits"]}")
+        print(f"{testing_counter:0{len(str(testing_counter_limit))}} |  letter_index: {letter_index:01} | letter bt: {letter} {letter_digits[letter]["backtrack"]} | {solution} | {operations[operation_index]["operation"]} = {operations[operation_index]["result"]} | {carry} | btM: {letter_digits["M"]["backtrack"]}")
 
         if solution[operations[operation_index]["result"]] is None:
             if operation_result not in solution.values() and \
                operation_result in letter_digits[letter]["available digits"]: # Add operation result to solution
+                print("ADVANCE OP")
                 letter_digits[letter]["available digits"].remove(operation_result)
                 letter_digits[letter]["used digits"].append(operation_result)
                 for l in letters:
@@ -146,7 +163,7 @@ def solve(puzzle: str, /) -> dict:
                 solution[operations[operation_index]["result"]] = operation_result
                 operation_index += 1
             else: # Backtrack letter
-                # print(letter, letter_digits[letter]["backtrack"])
+                # print(letter, letter_digits[letter]["backtrack"], "| btM: ", {letter_digits["M"]["backtrack"]})
                 _update_letters(letter)
                 """# if letter_digits[letter]["backtrack"] == 1:
                 #     for l in letters:
@@ -160,9 +177,14 @@ def solve(puzzle: str, /) -> dict:
                 #     letter_index -= 2
                 # letter_digits[letter]["backtrack"] -= 1
                 # backtracked = True"""
-                # print("|", letter, letter_digits[letter]["backtrack"])
+                # print("¿", letter, letter_digits[letter]["backtrack"], "| btM: ", {letter_digits["M"]["backtrack"]})
+        elif not operations[operation_index]["operation"]: # Backtrack operation
+            # print(f"BO | btM: {letter_digits["M"]["backtrack"]}")
+            letter_index = addend_amount
+            operation_index -= 1
+            _update_letters(operations[operation_index]["operation"][letter_index-1])
         elif solution[operations[operation_index]["result"]] != operation_result: # Backtrack letter
-            # print("@ ", letter, letter_digits[letter]["backtrack"])
+            # print("@ ", letter, letter_digits[letter]["backtrack"], "| btM: ", {letter_digits["M"]["backtrack"]})
             _update_letters(letter)
             """# if letter_digits[letter]["backtrack"] == 1:
             #     for l in letters:
@@ -176,13 +198,16 @@ def solve(puzzle: str, /) -> dict:
             #     letter_index -= 2
             # letter_digits[letter]["backtrack"] -= 1
             # backtracked = True"""
-            # print("| ", letter, letter_digits[letter]["backtrack"])
-        elif solution[operations[operation_index]["result"]] == operation_result:
+            # print("?", letter, letter_digits[letter]["backtrack"], solution, "| btM: ",{letter_digits["M"]["backtrack"]})
+        elif solution[operations[operation_index]["result"]] == operation_result: # Advance operation
+            print("advance op")
             operation_index += 1
 
+    ################ TEST COUNTERS #################
         testing_counter+=1 # TODO: Delete
         if testing_counter > testing_counter_limit: # TODO: Delete
             return False # TODO: Delete
+    ################ TEST COUNTERS #################
 
     return dict(solution)
 
